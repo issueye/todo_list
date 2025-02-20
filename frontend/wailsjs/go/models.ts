@@ -3,6 +3,7 @@ export namespace db {
 	export class Todo {
 	    id: number;
 	    title: string;
+	    level: string;
 	    description: string;
 	    completed: boolean;
 	    // Go type: time
@@ -20,6 +21,7 @@ export namespace db {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.id = source["id"];
 	        this.title = source["title"];
+	        this.level = source["level"];
 	        this.description = source["description"];
 	        this.completed = source["completed"];
 	        this.due_date = this.convertValues(source["due_date"], null);

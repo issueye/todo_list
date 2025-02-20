@@ -16,13 +16,13 @@ const emit = defineEmits(['close', 'save'])
 
 const todoText = ref('')
 const priority = ref('medium')
-const dueDate = ref('')
+const dueDate = ref(new Date().toISOString().split('T')[0])
 
 // 监听编辑状态变化，更新表单数据
 watch(() => props.editingTodo, (newTodo) => {
   if (newTodo) {
     todoText.value = newTodo.title || ''
-    priority.value = newTodo.priority || 'medium'
+    priority.value = newTodo.level || 'medium'
     dueDate.value = newTodo.due_date ? new Date(newTodo.due_date).toISOString().slice(0, 16) : ''
   } else {
     // 新建时设置默认值
@@ -36,7 +36,7 @@ const handleSubmit = () => {
   if (todoText.value.trim()) {
     emit('save', {
       text: todoText.value.trim(),
-      priority: priority.value,
+      level: priority.value,
       dueDate: dueDate.value
     })
     todoText.value = ''
@@ -99,8 +99,8 @@ const handleClose = () => {
                   type="radio"
                   v-model="priority"
                   value="high"
-                  class="form-radio h-5 w-5 text-red-600 focus:ring-red-500"
-                >
+                  class="appearance-none h-5 w-5 border border-gray-300 checked:bg-red-600 checked:border-red-600 focus:ring-red-500 transition duration-200 cursor-pointer"
+              >
                 <span class="ml-2 text-sm text-gray-700">高</span>
               </label>
               <label class="inline-flex items-center hover:opacity-80 cursor-pointer">
@@ -108,8 +108,8 @@ const handleClose = () => {
                   type="radio"
                   v-model="priority"
                   value="medium"
-                  class="form-radio h-5 w-5 text-yellow-600 focus:ring-yellow-500"
-                >
+                  class="appearance-none h-5 w-5 border border-gray-300 checked:bg-yellow-600 checked:border-yellow-600 focus:ring-yellow-500 transition duration-200 cursor-pointer"
+              >
                 <span class="ml-2 text-sm text-gray-700">中</span>
               </label>
               <label class="inline-flex items-center hover:opacity-80 cursor-pointer">
@@ -117,8 +117,8 @@ const handleClose = () => {
                   type="radio"
                   v-model="priority"
                   value="low"
-                  class="form-radio h-5 w-5 text-green-600 focus:ring-green-500"
-                >
+                  class="appearance-none h-5 w-5 border border-gray-300 checked:bg-green-600 checked:border-green-600 focus:ring-green-500 transition duration-200 cursor-pointer"
+              >
                 <span class="ml-2 text-sm text-gray-700">低</span>
               </label>
             </div>

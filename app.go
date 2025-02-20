@@ -34,23 +34,24 @@ func (a *App) startup(ctx context.Context) {
 // shutdown is called when the app is closing
 func (a *App) shutdown(ctx context.Context) {
 	if err := db.CloseDB(); err != nil {
-		slog.Error("关闭数据库失败", err)
+		slog.Error("关闭数据库失败", "错误信息", err.Error())
 	}
 	slog.Info("应用程序关闭")
 }
 
 // CreateTodo 创建新的待办事项
-func (a *App) CreateTodo(title string, dueDate string) error {
+func (a *App) CreateTodo(title string, level string, dueDate string) error {
 	slog.Info("创建待办事项", "title", title, "dueDate", dueDate)
 
 	todo := &db.Todo{
 		Title: title,
+		Level: level,
 	}
 
 	if dueDate != "" {
 		parsedTime, err := time.Parse("2006-01-02T15:04", dueDate)
 		if err != nil {
-			slog.Error("日期格式无效", err)
+			slog.Error("日期格式无效", "错误信息", err.Error())
 			return fmt.Errorf("invalid date format: %v", err)
 		}
 
@@ -63,15 +64,17 @@ func (a *App) CreateTodo(title string, dueDate string) error {
 }
 
 // UpdateTodo 更新待办事项
-func (a *App) UpdateTodo(id uint, title string, completed bool, dueDate string) error {
+func (a *App) UpdateTodo(id uint, title string, level string, completed bool, dueDate string) error {
 	// 先查询数据
 	todo, err := a.GetTodo(id)
 	if err != nil {
+		slog.Error("更新待办事项失败", "错误信息", err.Error())
 		return err
 	}
 
 	// 更新数据
 	todo.Title = title
+	todo.Level = level
 	todo.Completed = completed
 
 	if dueDate != "" {
@@ -102,11 +105,6 @@ func (a *App) DeleteTodo(id uint) error {
 }
 
 // GetAllTodos 获取所有待办事项
-func (a *App) GetAllTodos() ([]db.Todo, error) {
-	return db.GetTodos()
-}
-
-// Greet returns a greeting for the given name
-func (a *App) Greet(name string) string {
-	return fmt.Sprintf("Hello %s, It's show time!", name)
+func (a *App) GetAllTodos(filter string, date string, state int) ([]db.Todo, error) {
+	return db.GetTodos(filter, date, state)
 }

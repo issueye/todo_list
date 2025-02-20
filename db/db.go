@@ -1,6 +1,7 @@
 package db
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -16,6 +17,7 @@ import (
 type Todo struct {
 	Id          uint      `gorm:"column:id;primaryKey;autoIncrement;comment:编码;" json:"id"`      // 编码
 	Title       string    `gorm:"column:title;not null;comment:标题;" json:"title"`                // 标题
+	Level       string    `gorm:"column:level;comment:等级;" json:"level"`                         // 等级
 	Description string    `gorm:"column:description;default:'';comment:描述;" json:"description"`  // 描述
 	Completed   bool      `gorm:"column:completed;default:false;comment:完成状态;" json:"completed"` // 完成状态
 	DueDate     time.Time `gorm:"column:due_date;comment:开始时间;" json:"due_date"`                 // 添加截止日期字段
@@ -92,9 +94,22 @@ func CreateTodo(todo *Todo) error {
 }
 
 // GetTodos 获取所有待办事项
-func GetTodos() ([]Todo, error) {
+func GetTodos(filter string, date string, state int) ([]Todo, error) {
 	var todos []Todo
-	err := GetDB().Order("due_date asc").Find(&todos).Error
+
+	qry := GetDB().Order("due_date asc")
+
+	qry = qry.Where("substring(due_date, 1, 10) = ?", date)
+
+	if filter != "" {
+		qry = qry.Where("title like ?", fmt.Sprintf(`%%%s%%`, filter))
+	}
+
+	if state != -1 {
+		qry = qry.Where("completed = ?", state)
+	}
+
+	err := qry.Find(&todos).Error
 	return todos, err
 }
 
@@ -110,7 +125,7 @@ func GetTodosByDate(date time.Time) ([]Todo, error) {
 
 // UpdateTodo 更新待办事项
 func UpdateTodo(todo *Todo) error {
-	return GetDB().Where("id = ?", todo.Id).Save(todo).Error
+	return GetDB().Save(todo).Error
 }
 
 // DeleteTodo 删除待办事项
