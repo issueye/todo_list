@@ -57,7 +57,7 @@ func (srv *TodoService) GetDateTodoStat(groupId uint, date string) (*Stat, error
 	qry := GetDB().Order("due_date asc")
 	qry = qry.Where("substring(due_date, 1, 10) = ?", date)
 	cols := `sum(case when completed = 1 then 1 else 0 end) as completed_count, 
-	sum(case when completed = 1 then 1 else 0 end) as uncompleted_count, 
+	sum(case when completed = 0 then 1 else 0 end) as uncompleted_count, 
 	count(*) as all_count,
 	group_id`
 	stat := Stat{}
