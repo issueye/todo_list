@@ -2,40 +2,42 @@ package main
 
 import (
 	"embed"
-	"fmt"
-	"todo_list/db"
+	"todo_list/server"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
+	"github.com/wailsapp/wails/v2/pkg/options/windows"
 )
 
 //go:embed all:frontend/dist
 var assets embed.FS
 
 func main() {
-
-	// 初始化数据库
-	err := db.InitDB()
-	if err != nil {
-		panic(fmt.Errorf("数据库初始化失败：%w", err))
-	}
 	// Create an instance of the app structure
-	app := NewApp()
+	app := server.NewApp()
 
 	// Create application with options
-	err = wails.Run(&options.App{
+	err := wails.Run(&options.App{
 		Title:         "待办事项",
-		Width:         500,
+		Width:         1200,
 		Height:        800,
-		DisableResize: true,
+		DisableResize: false,
+		Frameless:     true,
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
-		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
-		OnStartup:        app.startup,
-		Bind: []interface{}{
-			app,
+		BackgroundColour: &options.RGBA{R: 245, G: 245, B: 245, A: 1},
+		OnStartup:        app.Startup,
+		OnShutdown:       app.Shutdown,
+		Bind:             []interface{}{app},
+		Windows: &windows.Options{
+			WindowIsTranslucent:               true,
+			WebviewIsTransparent:              true,
+			BackdropType:                      windows.Mica,
+			DisableWindowIcon:                 true,
+			DisableFramelessWindowDecorations: true,
+			WebviewUserDataPath:               "",
 		},
 	})
 
