@@ -39,6 +39,8 @@ func (srv *TodoService) GetTodoList(condition QryTodoList) ([]Todo, error) {
 	qry := GetDB().Order("due_date asc")
 	qry = qry.Where("substring(due_date, 1, 10) = ?", condition.Date)
 
+	qry = qry.Where("group_id =?", condition.GroupId)
+
 	if condition.Filter != "" {
 		qry = qry.Where("title like ?", fmt.Sprintf(`%%%s%%`, condition.Filter))
 	}
@@ -51,14 +53,15 @@ func (srv *TodoService) GetTodoList(condition QryTodoList) ([]Todo, error) {
 	return todos, err
 }
 
-func (srv *TodoService) GetDateTodoStat(date string) (*Stat, error) {
+func (srv *TodoService) GetDateTodoStat(groupId uint, date string) (*Stat, error) {
 	qry := GetDB().Order("due_date asc")
 	qry = qry.Where("substring(due_date, 1, 10) = ?", date)
 	cols := `sum(case when completed = 1 then 1 else 0 end) as completed_count, 
 	sum(case when completed = 1 then 1 else 0 end) as uncompleted_count, 
-	count(*) as all_count`
+	count(*) as all_count,
+	group_id`
 	stat := Stat{}
-	err := qry.Select(cols).Model(&Todo{}).Find(&stat).Error
+	err := qry.Select(cols).Model(&Todo{}).Group("group_id").Where("group_id = ?", groupId).Find(&stat).Error
 	return &stat, err
 }
 

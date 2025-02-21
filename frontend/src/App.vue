@@ -7,6 +7,7 @@ import SearchBar from '@/components/SearchBar.vue'
 import FilterTabs from '@/components/FilterTabs.vue'
 import TodoList from '@/components/TodoList.vue'
 import Header from '@/components/Header.vue'
+import Toast from '@/components/Toast.vue'
 import { GetTodoList, CreateTodo, UpdateTodo, DeleteTodo, UpdateTodoState } from '@/wailsjs/go/server/App'
 
 const todos = ref([])
@@ -45,6 +46,16 @@ const handleClose = () => {
 }
 const handleSave = async ({ text, level, dueDate, estimatedHours, progress }) => {
   try {
+    // 如果为空，则获取当前时间
+    if (!dueDate) {
+      dueDate = new Date().toISOString().substr(0, 16);
+    }
+
+    // 2006-01-02T15:04:05Z07:00 处理这种带有Z的时间
+    if (dueDate.includes('Z')) {
+      dueDate = dueDate.substr(0, 16);
+    }
+
     if (editingTodo.value) {
       let data = {
         id: editingTodo.value.id,
@@ -53,8 +64,10 @@ const handleSave = async ({ text, level, dueDate, estimatedHours, progress }) =>
         computed: editingTodo.value.completed,
         due_date: `${dueDate}:00Z`,
         estimated_hours: estimatedHours,
+        group_id: selectedGroup.value ? selectedGroup.value.id : 0,
         progress: progress
       }
+      console.log('更新数据:', data);
       await UpdateTodo(data)
     } else {
       let data = {
@@ -62,8 +75,10 @@ const handleSave = async ({ text, level, dueDate, estimatedHours, progress }) =>
         level: level,
         due_date: `${dueDate}:00Z`,
         estimated_hours: estimatedHours,
+        group_id: selectedGroup.value ? selectedGroup.value.id : 0,
         progress: progress
       }
+      console.log('新增数据:', data);
       await CreateTodo(data)
     }
     isModalOpen.value = false
@@ -77,7 +92,7 @@ const handleSave = async ({ text, level, dueDate, estimatedHours, progress }) =>
  * 获取数据
  */
 const getData = async () => {
-  console.log('selectedDate.value', selectedDate.value);
+  if (!selectedGroup.value) return;
   // 将时间转换为  YYYY-MM-DD 格式
   let qry_date = selectedDate.value.substr(0, 10);
 
@@ -92,8 +107,8 @@ const getData = async () => {
     }
   }
 
-  console.log('state', state());
   let params = {
+    group_id: selectedGroup.value ? selectedGroup.value.id : 0,
     filter: searchKeyword.value,
     date: qry_date,
     state: state(),
@@ -128,14 +143,19 @@ const deleteTodo = async (id) => {
   try {
     await DeleteTodo(id)
     todos.value = todos.value.filter(todo => todo.id !== id)
+    toast.value.show('删除成功', 'success')
   } catch (error) {
     console.error('删除待办事项失败:', error)
+    toast.value.show('删除失败', 'error')
   }
 }
+
+const toast = ref(null)
 </script>
 
 <template>
-  <div class="h-full bg-gray-100 flex flex-col border border-solid border-gray-400" style="--wails-draggable: drag">
+  <div class="h-full backdrop-opacity-10 flex flex-col shadow-lg border border-solid border-gray-400"
+    style="--wails-draggable: drag">
     <Header />
     <div class="flex-1 py-3 sm:py-12">
       <div class="relative flex-1 sm:max-w-5xl sm:mx-auto w-full sm:px-0">
@@ -169,4 +189,5 @@ const deleteTodo = async (id) => {
     </div>
   </div>
   <TodoModal :is-open="isModalOpen" :editing-todo="editingTodo" @close="handleClose" @save="handleSave" />
+  <Toast ref="toast" />
 </template>

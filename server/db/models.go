@@ -13,7 +13,8 @@ type TodoList struct {
 }
 
 type QryTodoList struct {
-	Filter string `form:"filter" json:"filter"` // 过滤条件
-	State  int    `form:"state" json:"state"`   // 状态
-	Date   string `form:"date" json:"date"`     // 日期
+	GroupId uint   `form:"group_id" json:"group_id"` // 分组ID
+	Filter  string `form:"filter" json:"filter"`     // 过滤条件
+	State   int    `form:"state" json:"state"`       // 状态
+	Date    string `form:"date" json:"date"`         // 日期
 }

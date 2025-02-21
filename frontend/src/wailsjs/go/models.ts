@@ -1,6 +1,7 @@
 export namespace db {
 	
 	export class QryTodoList {
+	    group_id: number;
 	    filter: string;
 	    state: number;
 	    date: string;
@@ -11,6 +12,7 @@ export namespace db {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.group_id = source["group_id"];
 	        this.filter = source["filter"];
 	        this.state = source["state"];
 	        this.date = source["date"];

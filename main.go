@@ -20,8 +20,10 @@ func main() {
 	// Create application with options
 	err := wails.Run(&options.App{
 		Title:         "待办事项",
-		Width:         1200,
+		Width:         1100,
 		Height:        800,
+		MaxWidth:      1100,
+		MinWidth:      800,
 		DisableResize: false,
 		Frameless:     true,
 		AssetServer: &assetserver.Options{

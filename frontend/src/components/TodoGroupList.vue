@@ -20,6 +20,12 @@ onMounted(async () => {
 async function loadGroups() {
     try {
         groups.value = await GetAllTodoGroups('')
+        if (groups.value.length > 0) {
+            if (!selectedGroup.value) {
+                selectedGroup.value = groups.value[0]
+                emit('groupSelected', groups.value[0])
+            }
+        }
     } catch (error) {
         console.error('加载事项组失败:', error)
     }

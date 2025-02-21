@@ -80,7 +80,7 @@ func (l *Logic) DeleteTodo(id uint) error {
 
 func (l *Logic) GetTodoList(condition db.QryTodoList) (*db.TodoList, error) {
 	// 获取统计信息
-	stat, err := l.TodoSrv.GetDateTodoStat(condition.Date)
+	stat, err := l.TodoSrv.GetDateTodoStat(condition.GroupId, condition.Date)
 	if err != nil {
 		slog.Error("获取待办事项统计信息失败", "错误信息", err.Error())
 		return nil, err
